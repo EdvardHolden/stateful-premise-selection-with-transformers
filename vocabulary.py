@@ -1,5 +1,8 @@
+import config
+
+
 class Vocabulary:
-    PAD_INDEX = 0
+    PAD_INDEX = config.PAD_INDEX
 
     def __init__(self):
         self.word2index = {}
@@ -56,7 +59,7 @@ class SourceVocabulary(Vocabulary):
 
 
 class TargetVocabulary(Vocabulary):
-    START_END_INDEX = 1
+    START_END_INDEX = config.START_END_INDEX
 
     def __init__(self):
         super().__init__()
