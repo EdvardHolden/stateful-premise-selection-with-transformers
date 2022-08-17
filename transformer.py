@@ -11,7 +11,6 @@ def clones(module, num_layers):
 
 
 class MultiHeadAttention(nn.Module):
-
     def __init__(self, state_size, num_heads, dropout=0.1):
         assert state_size % num_heads == 0
         super(MultiHeadAttention, self).__init__()
@@ -29,14 +28,14 @@ class MultiHeadAttention(nn.Module):
 
     def _attention(self, query, key, value, mask):
         logits = torch.matmul(query, key.transpose(-2, -1)) * self.scale
-        if (mask is not None):
-            scores = logits.masked_fill(mask == 0, float('-inf'))
+        if mask is not None:
+            scores = logits.masked_fill(mask == 0, float("-inf"))
         scores = F.softmax(scores, dim=-1)
         scores = self.dropout(scores)
         return torch.matmul(scores, value)
 
     def forward(self, query, key, value, mask=None):
-        if (mask is not None):
+        if mask is not None:
             mask = mask.unsqueeze(1)
         batch_size = query.size(0)
         # length = query.size(1)
@@ -50,7 +49,6 @@ class MultiHeadAttention(nn.Module):
 
 
 class ScaledEmbedding(nn.Module):
-
     def __init__(self, vocab_size, state_size, pad_index):
         super(ScaledEmbedding, self).__init__()
         self.scale = math.sqrt(state_size)
@@ -61,7 +59,6 @@ class ScaledEmbedding(nn.Module):
 
 
 class PositionalEncoding(nn.Module):
-
     def __init__(self, state_size, dropout=0.1, max_length=1000):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
@@ -71,15 +68,14 @@ class PositionalEncoding(nn.Module):
         positional_encoding[:, 0::2] = torch.sin(position * scale)
         positional_encoding[:, 1::2] = torch.cos(position * scale)
         positional_encoding = positional_encoding.unsqueeze(0)
-        self.register_buffer('positional_encoding', positional_encoding)
+        self.register_buffer("positional_encoding", positional_encoding)
 
     def forward(self, x):
-        output = x + self.positional_encoding[:, :x.size(1)]
+        output = x + self.positional_encoding[:, : x.size(1)]
         return self.dropout(output)
 
 
 class PositionWiseFeedForward(nn.Module):
-
     def __init__(self, state_size, hidden_size, dropout=0.1):
         super(PositionWiseFeedForward, self).__init__()
         self.w1 = nn.Linear(state_size, hidden_size)
@@ -95,7 +91,6 @@ class PositionWiseFeedForward(nn.Module):
 
 
 class ResidualConnection(nn.Module):
-
     def __init__(self, size, dropout):
         super(ResidualConnection, self).__init__()
         self.norm = nn.LayerNorm(size, eps=1e-6)
@@ -106,7 +101,6 @@ class ResidualConnection(nn.Module):
 
 
 class TransformerEncoderLayer(nn.Module):
-
     def __init__(self, size, num_heads, hidden_size, dropout=0.1):
         super(TransformerEncoderLayer, self).__init__()
         self.size = size
@@ -123,7 +117,6 @@ class TransformerEncoderLayer(nn.Module):
 
 
 class TransformerEncoder(nn.Module):
-
     def __init__(self, num_layers, state_size, num_heads, hidden_size, dropout=0.1):
         super(TransformerEncoder, self).__init__()
         layer = TransformerEncoderLayer(state_size, num_heads, hidden_size, dropout)
@@ -138,7 +131,6 @@ class TransformerEncoder(nn.Module):
 
 
 class TransformerDecoderLayer(nn.Module):
-
     def __init__(self, size, num_heads, hidden_size, dropout=0.1):
         super(TransformerDecoderLayer, self).__init__()
         self.size = size
@@ -161,7 +153,6 @@ class TransformerDecoderLayer(nn.Module):
 
 
 class TransformerDecoder(nn.Module):
-
     def __init__(self, num_layers, state_size, num_heads, hidden_size, dropout=0.1):
         super(TransformerDecoder, self).__init__()
         layer = TransformerDecoderLayer(state_size, num_heads, hidden_size, dropout)
@@ -176,20 +167,29 @@ class TransformerDecoder(nn.Module):
 
 
 class TransformerGenerator(nn.Module):
-
     def __init__(self, state_size, vocab_size):
         super(TransformerGenerator, self).__init__()
         self.linear = nn.Linear(state_size, vocab_size)
 
     def forward(self, x):
         # return self.linear(x)
-        return F.log_softmax(self.linear(x), dim = -1)
+        return F.log_softmax(self.linear(x), dim=-1)
 
 
 class TransformerEncoderDecoder(nn.Module):
-
-    def __init__(self, source_vocab_size, target_vocab_size, num_layers, state_size, num_heads, hidden_size,
-                 pad_index, dropout=0.1, source_position=True, target_position=True):
+    def __init__(
+        self,
+        source_vocab_size,
+        target_vocab_size,
+        num_layers,
+        state_size,
+        num_heads,
+        hidden_size,
+        pad_index,
+        dropout=0.1,
+        source_position=True,
+        target_position=True,
+    ):
         super(TransformerEncoderDecoder, self).__init__()
         self.state_size = state_size
         self.encoder = TransformerEncoder(num_layers, state_size, num_heads, hidden_size, dropout)
@@ -218,9 +218,18 @@ class TransformerEncoderDecoder(nn.Module):
 
 
 class Transformer(nn.Module):
-
-    def __init__(self, source_vocab, target_vocab, num_layers, state_size, num_heads, hidden_size, dropout=0.1,
-                 source_position=True, target_position=True):
+    def __init__(
+        self,
+        source_vocab,
+        target_vocab,
+        num_layers,
+        state_size,
+        num_heads,
+        hidden_size,
+        dropout=0.1,
+        source_position=True,
+        target_position=True,
+    ):
         super(Transformer, self).__init__()
         self.source_vocab = source_vocab
         self.target_vocab = target_vocab
@@ -267,17 +276,26 @@ class Transformer(nn.Module):
     def decode(self, encoded_source, target, source_mask, target_mask):
         return self.decoder(encoded_source, self.target_embedding(target), source_mask, target_mask)
 
-    def forward(self, source, target = None, source_mask = None, target_mask = None, type = 'teacher_forcing', max_length = None, beam_size = None):
-        if (type == 'teacher_forcing'):
-            if (source_mask is None):
+    def forward(
+        self,
+        source,
+        target=None,
+        source_mask=None,
+        target_mask=None,
+        type="teacher_forcing",
+        max_length=None,
+        beam_size=None,
+    ):
+        if type == "teacher_forcing":
+            if source_mask is None:
                 source_mask = self._source_mask(source)
-            if (target_mask is None):
+            if target_mask is None:
                 target_mask = self._target_mask(target)
             encoded_source = self.encode(source, source_mask)
             return self.generator(self.decode(encoded_source, target, source_mask, target_mask))
-        elif (type == 'beam_search'):
+        elif type == "beam_search":
             return self.beam_search(source, beam_size, max_length)
-        elif (type == 'greedy'):
+        elif type == "greedy":
             return self.greedy_decode(source, max_length)
 
     def greedy_decode_with_lengths(self, source, source_mask, lengths):
@@ -285,14 +303,17 @@ class Transformer(nn.Module):
         encoded_source = self.model.encode(source, source_mask)
 
         max_length = lengths.max().item()
-        target = torch.full([batch_size, 1], self.target_vocab.START_END_INDEX, dtype=torch.long, device=source.device)
+        target = torch.full(
+            [batch_size, 1], self.target_vocab.START_END_INDEX, dtype=torch.long, device=source.device
+        )
         output = torch.zeros([batch_size, max_length, self.target_vocab.num_words], device=source.device)
 
         for i in range(max_length):
             running = i < lengths
             target_mask = self._target_mask(target[running])
-            logits = self.model.generator(self.model.decode(encoded_source[running], target[running],
-                                                            source_mask[running], target_mask))
+            logits = self.model.generator(
+                self.model.decode(encoded_source[running], target[running], source_mask[running], target_mask)
+            )
             output[running, i] = logits[:, -1]
             next_word = torch.argmax(output[:, i], -1).unsqueeze(1)
             target = torch.cat([target, next_word], dim=-1)
@@ -304,14 +325,18 @@ class Transformer(nn.Module):
         encoded_source = self.encode(source, source_mask)
 
         running = torch.ones(batch_size, dtype=torch.bool, device=source.device)
-        target = torch.full([batch_size, 1], self.target_vocab.START_END_INDEX, dtype=torch.long, device=source.device)
-        output = torch.full([batch_size, max_length], self.target_vocab.PAD_INDEX, dtype=torch.long,
-                            device=source.device)
+        target = torch.full(
+            [batch_size, 1], self.target_vocab.START_END_INDEX, dtype=torch.long, device=source.device
+        )
+        output = torch.full(
+            [batch_size, max_length], self.target_vocab.PAD_INDEX, dtype=torch.long, device=source.device
+        )
 
         for i in range(max_length):
             target_mask = self._target_mask(target[running])
-            logits = self.generator(self.decode(encoded_source[running], target[running],
-                                                source_mask[running], target_mask))
+            logits = self.generator(
+                self.decode(encoded_source[running], target[running], source_mask[running], target_mask)
+            )
             next_word = torch.argmax(logits[:, -1], -1).detach()
             output[running, i] = next_word
             running &= output[:, i] != self.target_vocab.START_END_INDEX
@@ -321,12 +346,14 @@ class Transformer(nn.Module):
         return output
 
     def beam_search(self, source, beam_size, max_length):
-        assert source.size(0) == 1 # currently works only with batch size equal to 1
+        assert source.size(0) == 1  # currently works only with batch size equal to 1
         source_mask = self._source_mask(source)
         encoded_source = self.encode(source, source_mask)
 
-        target = torch.full([1, 1], self.target_vocab.START_END_INDEX, dtype = torch.long, device = source.device)
-        output = torch.full([beam_size, max_length], self.target_vocab.PAD_INDEX, dtype = torch.long, device = source.device)
+        target = torch.full([1, 1], self.target_vocab.START_END_INDEX, dtype=torch.long, device=source.device)
+        output = torch.full(
+            [beam_size, max_length], self.target_vocab.PAD_INDEX, dtype=torch.long, device=source.device
+        )
 
         target_mask = self._target_mask(target)
         next_log_probs = self.generator(self.decode(encoded_source, target, source_mask, target_mask))[:, -1]
@@ -337,17 +364,20 @@ class Transformer(nn.Module):
         output[:, 0] = next_word
         running = next_word != self.target_vocab.START_END_INDEX
 
-        target = torch.cat([target.repeat(beam_size, 1), next_word.unsqueeze(1)], dim = -1)
+        target = torch.cat([target.repeat(beam_size, 1), next_word.unsqueeze(1)], dim=-1)
 
         encoded_source = encoded_source.repeat(beam_size, 1, 1)
         source_mask = source_mask.repeat(beam_size, 1, 1)
 
         for i in range(1, max_length):
             target_mask = self._target_mask(target[running])
-            result = self.generator(self.decode(encoded_source[running], target[running],
-                                                source_mask[running], target_mask))[:, -1]
+            result = self.generator(
+                self.decode(encoded_source[running], target[running], source_mask[running], target_mask)
+            )[:, -1]
 
-            next_log_probs = torch.full([beam_size, self.target_vocab.num_words], float('-Inf'), device = source.device)
+            next_log_probs = torch.full(
+                [beam_size, self.target_vocab.num_words], float("-Inf"), device=source.device
+            )
             next_log_probs[running] = result
             next_log_probs[~running, self.target_vocab.PAD_INDEX] = 0
 
@@ -364,8 +394,8 @@ class Transformer(nn.Module):
             # print(beams)
             # print(next_word)
 
-            output = output.index_select(dim = 0, index = beams)
-            running = running.index_select(dim = 0, index = beams)
+            output = output.index_select(dim=0, index=beams)
+            running = running.index_select(dim=0, index=beams)
 
             output[:, i] = next_word
             output[~running, i] = self.target_vocab.PAD_INDEX
@@ -373,6 +403,6 @@ class Transformer(nn.Module):
             running &= next_word != self.target_vocab.START_END_INDEX
             if not running.any():
                 break
-            target = torch.cat([target.index_select(dim = 0, index = beams), next_word.unsqueeze(1)], dim=-1)
+            target = torch.cat([target.index_select(dim=0, index=beams), next_word.unsqueeze(1)], dim=-1)
 
         return output

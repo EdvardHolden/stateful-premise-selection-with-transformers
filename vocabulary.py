@@ -4,7 +4,7 @@ class Vocabulary:
     def __init__(self):
         self.word2index = {}
         self.word2count = {}
-        self.index2word = { self.PAD_INDEX: '<PAD>' }
+        self.index2word = {self.PAD_INDEX: "<PAD>"}
         self.num_words = 1
         self.num_sentences = 0
         self.longest_sentence = 0
@@ -20,7 +20,7 @@ class Vocabulary:
             self.word2count[word] += 1
 
     def add_sentence(self, sentence):
-        words = sentence.split(' ')
+        words = sentence.split(" ")
         for word in words:
             self.add_word(word)
         self.longest_sentence = max(self.longest_sentence, len(words))
@@ -35,10 +35,11 @@ class Vocabulary:
     def sentence2indices(self, sentence):
         pass
 
-class SourceVocabulary(Vocabulary):
 
+class SourceVocabulary(Vocabulary):
     def sentence2indices(self, sentence):
-        return [ self.word2index[word] for word in sentence.split(' ') ]
+        return [self.word2index[word] for word in sentence.split(" ")]
+
 
 # class SourceVocabulary(Vocabulary):
 #     START_END_INDEX = 1
@@ -53,20 +54,22 @@ class SourceVocabulary(Vocabulary):
 #         indices.append(self.START_END_INDEX)
 #         return indices
 
+
 class TargetVocabulary(Vocabulary):
     START_END_INDEX = 1
 
     def __init__(self):
         super().__init__()
-        self.index2word[self.START_END_INDEX] = '<START/END>'
+        self.index2word[self.START_END_INDEX] = "<START/END>"
         self.num_words += 1
 
     def sentence2indices(self, sentence):
-        indices = [ self.START_END_INDEX ]
-        for word in sentence.split(' '):
+        indices = [self.START_END_INDEX]
+        for word in sentence.split(" "):
             indices.append(self.word2index[word])
         indices.append(self.START_END_INDEX)
         return indices
+
 
 # class TargetVocabulary(Vocabulary):
 #     START_INDEX = 1

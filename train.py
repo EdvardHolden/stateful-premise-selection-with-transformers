@@ -1,4 +1,3 @@
-import math
 import numpy as np
 import torch
 from dataset import Statement2PremisesDataset
@@ -133,11 +132,9 @@ if __name__ == "__main__":
     train_source_path = "./data/train/prefix.src"
     train_target_path = "./data/train/prefix.tgt"
     source_vocab, target_vocab = build_vocabs(train_source_path, train_target_path)
-    print(source_vocab)
     train_dataset = Statement2PremisesDataset(
         train_source_path, train_target_path, source_vocab, target_vocab
     )
-    sys.exit(0)
     valid_dataset = Statement2PremisesDataset(
         valid_source_path, valid_target_path, source_vocab, target_vocab
     )
