@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 timestr = time.strftime("%Y_%m%d-%H%M%S")
+ORIGINAL_DATASET = os.path.join(Path.home(), "gnn-entailment-caption/nndata/")
 
 device = "cpu"
 # device = "gpu"
@@ -23,6 +24,8 @@ model_params = {
 }
 
 BATCH_SIZE = 64
+
+axiom_map_path = "data/name_axiom_map.pkl"
 
 # model_path = "./saved_models/transformer_500"
 model_path = "./saved_models/transformer_10"
