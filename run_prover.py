@@ -109,13 +109,21 @@ def run_E_prover(input_filename, output_filename):
     subprocess.call(
         [
             PATH_TO_EPROVER,
+            # Quote digits
             "--free-numbers",
+            # Run silently
             "-s",
+            # Print resource statistics
             "-R",
+            # The CPU time limit
             "--cpu-limit=" + str(CPU_TIME),
+            # Prover memory limit
             "--memory-limit=" + str(MEMORY_LIMIT),
+            # Print inference statistics
             "--print-statistics",
+            # Print a proof object
             "-p",
+            # Input format
             "--tstp-format",
             input_filename,
         ],
