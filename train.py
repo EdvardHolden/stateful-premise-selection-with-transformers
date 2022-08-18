@@ -2,6 +2,8 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
+import pickle
+import os
 
 import config
 from collate import VarLengthCollate
@@ -189,11 +191,13 @@ def main():
         model_state_size, 2, 8000, torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.998), eps=1e-9)
     )
 
+    results_dict = {"train_loss": []}
     step_count = 1
     for epoch in range(1, config.EPOCHS):
 
         # Train step
         model, train_loss, step_count = train_step(model, train_data_loader, step_count, optimizer)
+        results_dict["train_loss"] += [train_loss]
 
         # Evaluate step
         if config.EVALUATE:
@@ -206,9 +210,13 @@ def main():
         else:
             print("Epoch {}, Steps {}, Train loss {:.6}".format(epoch, step_count, train_loss))
 
-        # TODO rarely ever saves the model
-        if epoch % 100 == 0:
+        # Save the model at each specified time step
+        if epoch % 10 == 0:
             torch.save(model.state_dict(), config.model_save_path + "transformer_" + str(epoch))
+
+    # Save the dictionary
+    with open(os.path.join(config.model_save_path, "results.pkl"), "wb") as f:
+        pickle.dump(results_dict, f)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,7 @@
+import time
+
+timestr = time.strftime("%Y_%m%d-%H%M%S")
+
 device = "cpu"
 # device = "gpu"
 
@@ -5,6 +9,7 @@ EVALUATE = False
 
 EPOCHS = 11
 # EPOCHS = 1001
+# EPOCHS = 500  # They load predictions from here
 
 
 BATCH_SIZE = 64
@@ -18,7 +23,7 @@ train_target_path = "./data/debug/prefix.tgt"
 valid_source_path = "./data/debug/prefix.src"
 valid_target_path = "./data/debug/prefix.tgt"
 
-model_save_path = "./models/"
+model_save_path = "./saved_models/"
 
 PAD_INDEX = 0
 START_END_INDEX = 1
