@@ -34,6 +34,28 @@ from vocabulary import SourceVocabulary, TargetVocabulary
 #                  'target_lengths': len(premises_indices) }
 
 
+class StatementDataset(Dataset):
+    def __init__(self, source_path, source_vocab):
+        with open(source_path, "r") as source_file:
+            source_lines = []
+            while True:
+                source_line = source_file.readline().strip("\n")
+                if not source_line:
+                    break
+                source_lines.append(source_line)
+        self.statement_data = [source_vocab.sentence2indices(line) for line in source_lines]
+
+    def __len__(self):
+        return len(self.statement_data)
+
+    def __getitem__(self, item):
+        statement_indices = self.statement_data[item]
+        return {
+            "source": np.asarray(statement_indices, dtype=np.int64),
+            "source_lengths": len(statement_indices),
+        }
+
+
 class Statement2PremisesDataset(Dataset):
     def __init__(self, source_path, target_path, source_vocab, target_vocab):
         with open(source_path, "r") as source_file, open(target_path, "r") as target_file:

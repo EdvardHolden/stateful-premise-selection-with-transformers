@@ -6,17 +6,12 @@ import pickle
 import os
 
 import config
+from config import model_params
 from collate import VarLengthCollate
 from vocabulary import SourceVocabulary, TargetVocabulary
 from dataset import Statement2PremisesDataset
 from transformer import Transformer
 from learning_rate import NoamOpt
-
-# Some model parameters
-model_num_layers = 3
-model_state_size = 512
-model_num_heads = 8
-model_hidden_size = 2048
 
 
 # Some training parameters
@@ -172,10 +167,10 @@ def main():
     model = Transformer(
         source_vocab,
         target_vocab,
-        model_num_layers,
-        model_state_size,
-        model_num_heads,
-        model_hidden_size,
+        model_params["model_num_layers"],
+        model_params["model_state_size"],
+        model_params["model_num_heads"],
+        model_params["model_hidden_size"],
         target_position=False,
     )
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -188,7 +183,10 @@ def main():
 
     # Initialise the optimiser
     optimizer = NoamOpt(
-        model_state_size, 2, 8000, torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.998), eps=1e-9)
+        model_params["model_state_size"],
+        2,
+        8000,
+        torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.998), eps=1e-9),
     )
 
     results_dict = {"train_loss": []}
