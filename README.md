@@ -12,3 +12,14 @@ runnable scripts:
 - also predict.py  but it fails on importing local modules
 - run_prover.py
 - train.py
+
+
+
+# Basics
+
+
+Run `train.py` to train a model on the parameters given in config. The evaluation loop is super slow,
+so best to not use it during training. The model is saved to saved_model_path and the losses are logged
+in results.pkl
+
+
