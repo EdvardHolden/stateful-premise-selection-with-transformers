@@ -75,7 +75,6 @@ def train_step(model, train_data_loader, step_count, optimizer):
     train_loss = 0
     num_words = 0
     for batch_no, batch in enumerate(train_data_loader):
-        print(f"Batch: {batch_no}")
 
         # Transform input
         x = batch["source"].to(config.device)
@@ -191,7 +190,7 @@ def main():
 
     results_dict = {"train_loss": []}
     step_count = 1
-    for epoch in range(1, config.EPOCHS):
+    for epoch in range(1, config.EPOCHS + 1):
 
         # Train step
         model, train_loss, step_count = train_step(model, train_data_loader, step_count, optimizer)

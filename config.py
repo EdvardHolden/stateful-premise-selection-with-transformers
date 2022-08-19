@@ -25,7 +25,7 @@ model_params = {
 
 BATCH_SIZE = 64
 
-axiom_map_path = "data/name_axiom_map.pkl"
+axiom_map_path = "name_axiom_map.pkl"
 
 # model_path = "./saved_models/transformer_500"
 model_path = "./saved_models/transformer_10"
@@ -33,17 +33,20 @@ model_path = "./saved_models/transformer_10"
 # Path to result of running predict
 predictions_path = os.path.join("./predictions", Path(model_path).stem)
 
-# train_source_path = "./data/train/prefix.src"
-# train_target_path = "./data/train/prefix.tgt"
-train_source_path = "./data/debug/prefix.src"
-train_target_path = "./data/debug/prefix.tgt"
+
+DATA_PATH = "/home/eholden/stateful-premise-selection-with-RNNs/"
+
+# train_source_path = DATA_PATH + "data/train/standard.src"
+# train_target_path = DATA_PATH + "data/train/standard.tgt"
+train_source_path = DATA_PATH + "data/debug/standard.src"
+train_target_path = DATA_PATH + "data/debug/standard.tgt"
 
 
-valid_source_path = "./data/debug/prefix.src"
-valid_target_path = "./data/debug/prefix.tgt"
+valid_source_path = DATA_PATH + "data/debug/standard.src"
+valid_target_path = DATA_PATH + "data/debug/standard.tgt"
 
 # Path used for predictions
-evaluate_source_path = "./data/debug/prefix.src"
+evaluate_source_path = DATA_PATH + "data/debug/standard.src"
 
 model_save_path = "./saved_models/"
 

@@ -63,9 +63,10 @@ def main():
     print("Model parameters {}".format(num_params))
 
     # Load problem names to map with the conjecture and name
-    with open(os.path.join(os.path.dirname(config.train_source_path), "names"), "r") as f:
+    with open(os.path.join(os.path.dirname(config.train_source_path), "ids"), "r") as f:
         problem_names = f.read().splitlines()
     assert len(problem_names) == len(test_data_loader)
+    print("Number of problems:", len(problem_names))
 
     # Load axiom map path
     with open(config.axiom_map_path, "rb") as f:
@@ -82,14 +83,13 @@ def main():
             premises = []
             for index in indices:
                 if index != config.START_END_INDEX:
-                    premises.append(target_vocab.index2word[index.item()])
+                    if index != config.PAD_INDEX:
+                        premises.append(target_vocab.index2word[index.item()])
                 else:
                     break
             predicted_axioms = predicted_axioms.union(set(premises))
 
         # Map the axiom names to formulae
-        # TODO some names do not exist? just skip them fro now?
-        # predicted_axioms = [name_axiom_map[name] for name in predicted_axioms if name in name_axiom_map]
         predicted_axioms = [name_axiom_map[name] for name in predicted_axioms]
 
         # Get hold of the conjecture
@@ -97,10 +97,8 @@ def main():
 
         # Write to output file
         with open("./generated_problems/" + str(prob_name), "w") as f:
-            f.write(conj + "\n")
+            f.write(conj.strip() + "\n")
             f.write("\n".join(predicted_axioms))
-
-        return
 
 
 if __name__ == "__main__":
