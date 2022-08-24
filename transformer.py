@@ -5,6 +5,8 @@ import torch.nn.functional as F
 from copy import deepcopy
 import numpy as np
 
+import config
+
 
 def clones(module, num_layers):
     return nn.ModuleList([deepcopy(module) for _ in range(num_layers)])
@@ -186,6 +188,7 @@ class TransformerEncoderDecoder(nn.Module):
         num_heads,
         hidden_size,
         pad_index,
+        conjecture_max_length,
         dropout=0.1,
         source_position=True,
         target_position=True,
@@ -196,7 +199,7 @@ class TransformerEncoderDecoder(nn.Module):
         self.decoder = TransformerDecoder(num_layers, state_size, num_heads, hidden_size, dropout)
         source_embedding = ScaledEmbedding(source_vocab_size, state_size, pad_index)
         if source_position:
-            self.source_embedding = nn.Sequential(source_embedding, PositionalEncoding(state_size, dropout))
+            self.source_embedding = nn.Sequential(source_embedding, PositionalEncoding(state_size, dropout, max_length=conjecture_max_length))
         else:
             self.source_embedding = source_embedding
         target_embedding = ScaledEmbedding(target_vocab_size, state_size, pad_index)
@@ -226,6 +229,7 @@ class Transformer(nn.Module):
         state_size,
         num_heads,
         hidden_size,
+        conjecture_max_length,
         dropout=0.1,
         source_position=True,
         target_position=True,
@@ -240,11 +244,12 @@ class Transformer(nn.Module):
         self.decoder = TransformerDecoder(num_layers, state_size, num_heads, hidden_size, dropout)
         source_embedding = ScaledEmbedding(source_vocab_size, state_size, source_vocab.PAD_INDEX)
         if source_position:
-            self.source_embedding = nn.Sequential(source_embedding, PositionalEncoding(state_size, dropout))
+            self.source_embedding = nn.Sequential(source_embedding, PositionalEncoding(state_size, dropout, max_length=conjecture_max_length))
         else:
             self.source_embedding = source_embedding
         target_embedding = ScaledEmbedding(target_vocab_size, state_size, target_vocab.PAD_INDEX)
         if target_position:
+            # TODO currently doesnt use a target position, will have to add max lenght here
             self.target_embedding = nn.Sequential(target_embedding, PositionalEncoding(state_size, dropout))
         else:
             self.target_embedding = target_embedding
