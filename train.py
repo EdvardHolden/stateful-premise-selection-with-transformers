@@ -133,12 +133,12 @@ def evaluate_step(model, valid_data_loader):
 
 def main():
 
-    # Build training dataset
+    # Build vocabularies
     source_vocab, target_vocab = build_vocabs(config.train_source_path, config.train_target_path)
 
-    # Build vocabulary
+    # Build dataset
     train_dataset = Statement2PremisesDataset(
-        config.train_source_path, config.train_target_path, source_vocab, target_vocab
+        config.train_source_path, config.train_target_path, source_vocab, target_vocab, model_params["conjecture_max_length"]
     )
     print("Train size {}".format(len(train_dataset)))
     # Build train dataloader
@@ -151,16 +151,17 @@ def main():
         pin_memory=True,
     )
 
-    # Build validation dataset
-    valid_dataset = Statement2PremisesDataset(
-        config.valid_source_path, config.valid_target_path, source_vocab, target_vocab
-    )
-    print("Valid size {}".format(len(valid_dataset)))
+    # Build validation dataset - if evaluating
+    if config.EVALUATE:
+        valid_dataset = Statement2PremisesDataset(
+            config.valid_source_path, config.valid_target_path, source_vocab, target_vocab, model_params["conjecture_max_length"]
+        )
+        print("Valid size {}".format(len(valid_dataset)))
 
-    # Build validation data loader - bathc size of one
-    valid_data_loader = DataLoader(
-        valid_dataset, batch_size=1, num_workers=10, collate_fn=VarLengthCollate(batch_dim=0), pin_memory=True
-    )
+        # Build validation data loader - bathc size of one
+        valid_data_loader = DataLoader(
+            valid_dataset, batch_size=1, num_workers=10, collate_fn=VarLengthCollate(batch_dim=0), pin_memory=True
+        )
 
     # Initialise transformer model
     model = Transformer(
@@ -170,6 +171,7 @@ def main():
         model_params["model_state_size"],
         model_params["model_num_heads"],
         model_params["model_hidden_size"],
+        model_params["conjecture_max_length"],
         target_position=False,
     )
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -208,12 +210,12 @@ def main():
             print("Epoch {}, Steps {}, Train loss {:.6}".format(epoch, step_count, train_loss))
 
         # Save the model at each specified time step
-        if epoch % 10 == 0:
+        if epoch % 5 == 0:
             torch.save(model.state_dict(), config.model_save_path + "transformer_" + str(epoch))
 
-    # Save the dictionary
-    with open(os.path.join(config.model_save_path, "results.pkl"), "wb") as f:
-        pickle.dump(results_dict, f)
+        # Save the dictionary - Lets do this at each step so we can force termination
+        with open(os.path.join(config.model_save_path, "results.pkl"), "wb") as f:
+            pickle.dump(results_dict, f)
 
 
 if __name__ == "__main__":
