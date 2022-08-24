@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import pickle
 import os
+from tqdm import tqdm
 
 import config
 from config import model_params
@@ -31,7 +32,7 @@ def main():
     source_vocab, target_vocab = build_vocabs(config.train_source_path, config.train_target_path)
 
     # Build dataloader for the prediction set
-    test_dataset = StatementDataset(config.evaluate_source_path, source_vocab)
+    test_dataset = StatementDataset(config.evaluate_source_path, source_vocab, model_params["conjecture_max_length"])
     test_data_loader = DataLoader(
         test_dataset,
         batch_size=1,
@@ -49,6 +50,7 @@ def main():
         model_params["model_state_size"],
         model_params["model_num_heads"],
         model_params["model_hidden_size"],
+        model_params["conjecture_max_length"],
         target_position=False,
     )
 
@@ -63,7 +65,7 @@ def main():
     print("Model parameters {}".format(num_params))
 
     # Load problem names to map with the conjecture and name
-    with open(os.path.join(os.path.dirname(config.train_source_path), "ids"), "r") as f:
+    with open(os.path.join(os.path.dirname(config.evaluate_source_path), "ids"), "r") as f:
         problem_names = f.read().splitlines()
     assert len(problem_names) == len(test_data_loader)
     print("Number of problems:", len(problem_names))
@@ -72,7 +74,7 @@ def main():
     with open(config.axiom_map_path, "rb") as f:
         name_axiom_map = pickle.load(f)
 
-    for prob_no, (prob_name, prob_x) in enumerate(zip(problem_names, test_data_loader)):
+    for prob_no, (prob_name, prob_x) in tqdm(enumerate(zip(problem_names, test_data_loader))):
 
         x = prob_x["source"].to(config.device)
         # Return n number of beams
