@@ -19,7 +19,6 @@ def main():
             prob = f.readlines()
             for line in prob:
                 name = line.split("(", 1)[1].split(",", 1)[0]
-                print(name)
                 if name not in name_axiom_map:
                     name_axiom_map[name] = line[1:].strip()
 
