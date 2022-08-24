@@ -41,7 +41,12 @@ class Vocabulary:
 
 class SourceVocabulary(Vocabulary):
     def sentence2indices(self, sentence):
-        return [self.word2index[word] for word in sentence.split(" ")]
+        if len(sentence) == 0:
+            return []
+        if isinstance(sentence, str):
+            sentence = sentence.split()
+
+        return [self.word2index[word] for word in sentence if word in self.word2index]
 
 
 # class SourceVocabulary(Vocabulary):
@@ -68,8 +73,15 @@ class TargetVocabulary(Vocabulary):
 
     def sentence2indices(self, sentence):
         indices = [self.START_END_INDEX]
-        for word in sentence.split(" "):
-            indices.append(self.word2index[word])
+        if isinstance(sentence, str):
+            sentence = sentence.split()
+
+        # Add and tokenise each word in the sequence - skip unkown tokens
+        for word in sentence:
+            next_word = self.word2index.get(word, None)
+            if next_word is not None:
+                indices.append(next_word)
+
         indices.append(self.START_END_INDEX)
         return indices
 
